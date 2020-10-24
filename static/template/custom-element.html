@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .primary {
+      color: #3399ff;
+    }
+  </style>
+</head>
+<body>
+  <comp-counter></comp-counter>
+  <template id="counter">
+    <button class="btn">-</button>
+    <span></span>
+    <button class="btn">+</button>
+  </template>
+  <script>
+    class CustomButton extends HTMLElement {
+      connectedCallback() {
+        this.innerHTML = `<button type="button" class="primary">button</button>`
+      }
+      disconnectedCallback() {}
+    }
+
+    class CompCounter extends HTMLElement {
+      constructor() {
+        super();
+        this.state = {number: 0};
+      }
+
+      setState(state) {
+        this.state = state;
+        if (!this.numberText) {
+          this.numberText = this.querySelector('span');
+        }
+        this.numberText.innerText = state.number;
+      }
+
+      render() {
+        this.appendChild(document.getElementById('counter').content);
+        const [minusButton, plusButton] = this.querySelectorAll('.btn');
+        plusButton.onclick = () => {
+          this.setState({number: this.state.number + 1})
+        }
+        minusButton.onclick = () => {
+          this.setState({number: this.state.number - 1})
+        }
+        this.setState(this.state);
+      }
+
+      connectedCallback() {
+        this.render()
+      }
+    }
+
+    window.customElements.define('custom-button', CustomButton);
+    window.customElements.define('comp-counter', CompCounter);
+  </script>
+</body>
+</html>
