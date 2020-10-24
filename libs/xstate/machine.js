@@ -8,6 +8,7 @@ class StateNode {
     this.initial = config.initial
     this.value = value || this.initial
     this.machine = machine || this
+    this.context = config.context || this.machine.context
     this.on = config.on
     const states = {}
     if (config.states) {
@@ -21,7 +22,26 @@ class StateNode {
   next(event) {
     const { type } = event
     const nextState = this.on[type];
-    return this.getStateNode(nextState);
+    if (typeof nextState === 'string') {
+      return this.getStateNode(nextState);
+    }
+    const actions = nextState.actions;
+    if (Array.isArray(actions)) {
+      const context = this.context;
+      const newContext = {};
+      actions.forEach(action => {
+        const assignment = action.assignment;
+        for (let key in assignment) {
+          if (typeof assignment[key] === 'function') {
+            newContext[key] = assignment[key](context);
+          } else {
+            newContext[key] = assignment[key];
+          }
+        }
+      })
+      Object.assign(context, newContext)
+    }
+    return this;
   }
 
   getStateNode(stateKey) {
